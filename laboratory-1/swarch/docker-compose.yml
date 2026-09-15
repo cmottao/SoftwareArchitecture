@@ -1,0 +1,25 @@
+services:
+  swarch-mo:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      swarch-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql://root:123@swarch-db/swarch-db
+    volumes:
+      - .:/app
+
+  swarch-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: swarch-db
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
