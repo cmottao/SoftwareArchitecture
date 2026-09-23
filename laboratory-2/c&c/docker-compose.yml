@@ -1,0 +1,42 @@
+services:
+  component-1:
+    image: mongo
+    restart: always
+    container_name: component-1
+    environment:
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
+    ports:
+      - "27017:27017"
+
+  component-2:
+    build: ./component-2
+    container_name: component-2
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: mongodb://component-1:27017
+      DB_NAME: db
+    depends_on:
+      - component-1
+
+  component-3:
+    image: mysql:8
+    container_name: component-3
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: db
+    ports:
+      - "3306:3306"
+
+  component-4:
+    build: ./component-4
+    container_name: component-4
+    ports:
+      - "8001:8001"
+    environment:
+      DB_HOST: component-3
+      DB_USER: root
+      DB_PASSWORD: 123
+      DB_NAME: db
+    depends_on:
+      - component-3
